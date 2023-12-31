@@ -1,10 +1,21 @@
 import { useEffect, useState } from 'react';
 
-interface State<T> {
-  isLoading: boolean;
-  data?: T;
-  error?: any;
-}
+type State<T> =
+  | {
+      isLoading: true;
+      data: undefined;
+      error: undefined;
+    }
+  | {
+      isLoading: false;
+      data: T;
+      error: undefined;
+    }
+  | {
+      isLoading: false;
+      data: undefined;
+      error: { status: number };
+    };
 
 export function useFetchData<T>(
   url: string,
@@ -20,14 +31,18 @@ export function useFetchData<T>(
 
   useEffect(() => {
     const fetchData = async () => {
-      updateState({ isLoading: true });
+      updateState({ isLoading: true, data: undefined, error: undefined });
       const response = await fetch(url);
 
       if (response.ok) {
         const data = await response.json();
-        updateState({ isLoading: false, data: transform != null ? transform(data) : data });
+        updateState({
+          isLoading: false,
+          data: transform != null ? transform(data) : data,
+          error: undefined,
+        });
       } else {
-        updateState({ isLoading: false, error: { status: response.status } });
+        updateState({ isLoading: false, error: { status: response.status }, data: undefined });
       }
     };
 
