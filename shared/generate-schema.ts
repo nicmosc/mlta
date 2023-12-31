@@ -15,6 +15,9 @@ function generate(folder: Folder, transformTo: TransformTo) {
 
 if (process.argv[2] == null || process.argv[3] == null) {
   console.log('You must provide a folder and transform type');
+  console.log('Usage: npm run generate-schema [folder] [transform]');
+  console.log("Folder: e.g. 'backend-bun'");
+  console.log("Transform: 'none' | 'python' | 'go'");
   process.exit(1);
 }
 
