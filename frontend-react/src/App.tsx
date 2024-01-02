@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { Fragment, StrictMode } from 'react';
 import urlJoin from 'url-join';
 
 import { TodosResponse, UpdateTodoRequest, UpdateTodoResponse } from '../schema';
@@ -21,6 +21,7 @@ export const App = () => {
   } = useUrlParams<{ filter: 'active' | 'completed' }>();
 
   const allCompleted = data?.every((todo) => todo.completed);
+  const hasTodos = data?.length !== 0;
 
   const handleToggleAll = async () => {
     const todos = data ?? [];
@@ -54,17 +55,21 @@ export const App = () => {
           <NewTodo onCreate={refetch} />
         </header>
         <section className="main">
-          <input
-            onChange={() => handleToggleAll()}
-            checked={allCompleted ?? false}
-            id="toggle-all"
-            className="toggle-all"
-            type="checkbox"
-          />
-          <label htmlFor="toggle-all">Mark all as complete</label>
+          {hasTodos && (
+            <Fragment>
+              <input
+                onChange={() => handleToggleAll()}
+                checked={allCompleted ?? false}
+                id="toggle-all"
+                className="toggle-all"
+                type="checkbox"
+              />
+              <label htmlFor="toggle-all">Mark all as complete</label>
+            </Fragment>
+          )}
           <TodoList todos={todos} onChange={refetch} />
         </section>
-        {
+        {hasTodos && (
           <footer className="footer">
             <span className="todo-count">
               <strong>{data?.filter((todo) => !todo.completed).length ?? 0}</strong> items left
@@ -74,7 +79,7 @@ export const App = () => {
               <button className="clear-completed">Clear completed</button>
             )}
           </footer>
-        }
+        )}
       </section>
       <footer className="info">
         <p>Double-click to edit a todo</p>
