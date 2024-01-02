@@ -1,34 +1,65 @@
 import { StrictMode } from 'react';
 import urlJoin from 'url-join';
 
-import { useFetchData } from './hooks';
-import { TodosResponse } from '../schema';
-import { Filters, TodoList } from './components';
+import { TodosResponse, UpdateTodoRequest, UpdateTodoResponse } from '../schema';
+import { Filters, NewTodo, TodoList } from './components';
+import { useFetchData, useMutateData } from './hooks';
 
 export const App = () => {
-  const { data, isLoading, error } = useFetchData<TodosResponse>(
+  const { data, refetch } = useFetchData<TodosResponse>(
     urlJoin(import.meta.env.VITE_API_URL, '/api/todos'),
+    { keepPreviousData: true },
   );
+
+  const { mutate: update } = useMutateData<UpdateTodoRequest, UpdateTodoResponse>(
+    urlJoin(import.meta.env.VITE_API_URL, `/api/todos`),
+  );
+
+  const allCompleted = data?.data?.every((todo) => todo.completed);
+
+  const handleToggleAll = async () => {
+    const todos = data?.data ?? [];
+    for (const todo of todos) {
+      await update({
+        method: 'put',
+        body: { todo: { id: todo.id, completed: !allCompleted } },
+        params: `/${todo.id}`,
+      });
+    }
+
+    refetch();
+  };
 
   return (
     <StrictMode>
       <section className="todoapp">
         <header className="header">
           <h1>todos</h1>
-          <input className="new-todo" placeholder="What needs to be done?" autoFocus />
+          <NewTodo onCreate={refetch} />
         </header>
         <section className="main">
-          <input id="toggle-all" className="toggle-all" type="checkbox" />
+          <input
+            onChange={() => handleToggleAll()}
+            checked={allCompleted ?? false}
+            id="toggle-all"
+            className="toggle-all"
+            type="checkbox"
+          />
           <label htmlFor="toggle-all">Mark all as complete</label>
-          {!isLoading && !error && <TodoList todos={data.data!} />}
+          <TodoList todos={data?.data ?? []} onChange={refetch} />
         </section>
-        <footer className="footer">
-          <span className="todo-count">
-            <strong>{data?.data?.filter((todo) => !todo.completed).length ?? 0}</strong> items left
-          </span>
-          <Filters />
-          <button className="clear-completed">Clear completed</button>
-        </footer>
+        {
+          <footer className="footer">
+            <span className="todo-count">
+              <strong>{data?.data?.filter((todo) => !todo.completed).length ?? 0}</strong> items
+              left
+            </span>
+            <Filters />
+            {data?.data?.some((todo) => todo.completed) && (
+              <button className="clear-completed">Clear completed</button>
+            )}
+          </footer>
+        }
       </section>
       <footer className="info">
         <p>Double-click to edit a todo</p>

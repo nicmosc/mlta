@@ -26,10 +26,11 @@ const getTodos = async (req: BunRequest, res: BunResponse) => {
     await disconnectFromDatabase();
     return res.status(200).json(response);
   } catch (e) {
+    console.error(e);
     if (e instanceof Error) {
       return res.status(500).json({ message: e.message });
     }
-    return res.status(500).json({ message: 'Something went wrong' });
+    return res.status(500).json({ message: `Something went wrong: ${e}` });
   }
 };
 
@@ -46,10 +47,11 @@ const createTodo = async (req: BunRequest, res: BunResponse) => {
     await disconnectFromDatabase();
     return res.status(200).json(response);
   } catch (e: unknown) {
+    console.error(e);
     if (e instanceof Error) {
       return res.status(500).json({ message: e.message });
     }
-    return res.status(500).json({ message: 'Something went wrong' });
+    return res.status(500).json({ message: `Something went wrong: ${e}` });
   }
 };
 
@@ -67,23 +69,22 @@ const deleteTodo = async (req: BunRequest, res: BunResponse) => {
       return res.status(200).json(response);
     }
   } catch (e: unknown) {
+    console.error(e);
     if (e instanceof Error) {
       return res.status(500).json({ message: e.message });
     }
-    return res.status(500).json({ message: 'Something went wrong' });
+    return res.status(500).json({ message: `Something went wrong: ${e}` });
   }
 };
 
 const updateTodo = async (req: BunRequest, res: BunResponse) => {
   const updateTodoId = (req.params as Parameters<UpdateTodo>[0]).id;
   const updateTodoDto = req.body as Parameters<UpdateTodo>[0];
-  console.log({ updateTodoId, updateTodoDto });
+  await connectToDatabase();
   try {
-    await connectToDatabase();
     const todo = await TodoModel.findByIdAndUpdate(updateTodoId, updateTodoDto.todo, {
       returnDocument: 'after',
     });
-    await disconnectFromDatabase();
     if (!todo) {
       return res.status(404).json({ message: `Could not find Todo with id: ${updateTodoId}` });
     } else {
@@ -91,10 +92,11 @@ const updateTodo = async (req: BunRequest, res: BunResponse) => {
       return res.status(200).json(response);
     }
   } catch (e: unknown) {
+    console.error(e);
     if (e instanceof Error) {
       return res.status(500).json({ message: e.message });
     }
-    return res.status(500).json({ message: 'Something went wrong' });
+    return res.status(500).json({ message: `Something went wrong: ${e}` });
   }
 };
 

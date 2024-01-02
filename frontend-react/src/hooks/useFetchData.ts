@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 type State<T> =
   | {
       isLoading: true;
-      data: undefined;
+      data?: T;
       error: undefined;
     }
   | {
@@ -19,7 +19,7 @@ type State<T> =
 
 export function useFetchData<T>(
   url: string,
-  { transform, waitFor = true, shouldExecute = true }: any = {},
+  { transform, waitFor = true, keepPreviousData }: any = {},
 ) {
   // Use single state to avoid unncessary re-renders
   const [state, setState] = useState({
@@ -29,27 +29,31 @@ export function useFetchData<T>(
   } as State<T>);
   const updateState = (newState: State<T>) => setState((state) => ({ ...state, ...newState }));
 
+  const fetchData = async () => {
+    updateState({
+      isLoading: true,
+      data: keepPreviousData ? state.data : undefined,
+      error: undefined,
+    });
+    const response = await fetch(url);
+
+    if (response.ok) {
+      const data = await response.json();
+      updateState({
+        isLoading: false,
+        data: transform != null ? transform(data) : data,
+        error: undefined,
+      });
+    } else {
+      updateState({ isLoading: false, error: { status: response.status }, data: undefined });
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      updateState({ isLoading: true, data: undefined, error: undefined });
-      const response = await fetch(url);
-
-      if (response.ok) {
-        const data = await response.json();
-        updateState({
-          isLoading: false,
-          data: transform != null ? transform(data) : data,
-          error: undefined,
-        });
-      } else {
-        updateState({ isLoading: false, error: { status: response.status }, data: undefined });
-      }
-    };
-
-    if (waitFor && shouldExecute) {
+    if (waitFor) {
       fetchData();
     }
   }, [url, waitFor]);
 
-  return state;
+  return { ...state, refetch: fetchData };
 }
