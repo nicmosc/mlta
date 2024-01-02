@@ -3,3 +3,4 @@ export * from './useDebounce';
 export * from './useDoubleClick';
 export * from './useFetchData';
 export * from './useMutateData';
+export * from './useUrlParams';

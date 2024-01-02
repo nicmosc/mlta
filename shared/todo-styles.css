@@ -320,6 +320,7 @@ body {
 
 .filters li a:hover {
 	border-color: #DB7676;
+  cursor: pointer;
 }
 
 .filters li a.selected {

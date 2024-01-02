@@ -3,7 +3,7 @@ import urlJoin from 'url-join';
 
 import { TodosResponse, UpdateTodoRequest, UpdateTodoResponse } from '../schema';
 import { Filters, NewTodo, TodoList } from './components';
-import { useFetchData, useMutateData } from './hooks';
+import { useFetchData, useMutateData, useUrlParams } from './hooks';
 
 export const App = () => {
   const { data, refetch } = useFetchData<TodosResponse>(
@@ -14,6 +14,11 @@ export const App = () => {
   const { mutate: update } = useMutateData<UpdateTodoRequest, UpdateTodoResponse>(
     urlJoin(import.meta.env.VITE_API_URL, `/api/todos`),
   );
+
+  const {
+    urlParamsObject: { filter },
+    setUrlParams,
+  } = useUrlParams<{ filter: 'active' | 'completed' }>();
 
   const allCompleted = data?.data?.every((todo) => todo.completed);
 
@@ -29,6 +34,17 @@ export const App = () => {
 
     refetch();
   };
+
+  const todos =
+    data?.data?.filter((todo) => {
+      if (filter === 'active') {
+        return !todo.completed;
+      }
+      if (filter === 'completed') {
+        return todo.completed;
+      }
+      return true;
+    }) ?? [];
 
   return (
     <StrictMode>
@@ -46,7 +62,7 @@ export const App = () => {
             type="checkbox"
           />
           <label htmlFor="toggle-all">Mark all as complete</label>
-          <TodoList todos={data?.data ?? []} onChange={refetch} />
+          <TodoList todos={todos} onChange={refetch} />
         </section>
         {
           <footer className="footer">
@@ -54,7 +70,7 @@ export const App = () => {
               <strong>{data?.data?.filter((todo) => !todo.completed).length ?? 0}</strong> items
               left
             </span>
-            <Filters />
+            <Filters value={filter} onChange={(v) => setUrlParams({ filter: v })} />
             {data?.data?.some((todo) => todo.completed) && (
               <button className="clear-completed">Clear completed</button>
             )}
