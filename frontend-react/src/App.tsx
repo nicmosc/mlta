@@ -20,14 +20,14 @@ export const App = () => {
     setUrlParams,
   } = useUrlParams<{ filter: 'active' | 'completed' }>();
 
-  const allCompleted = data?.data?.every((todo) => todo.completed);
+  const allCompleted = data?.every((todo) => todo.completed);
 
   const handleToggleAll = async () => {
-    const todos = data?.data ?? [];
+    const todos = data ?? [];
     for (const todo of todos) {
       await update({
         method: 'put',
-        body: { todo: { id: todo.id, completed: !allCompleted } },
+        body: { id: todo.id, completed: !allCompleted },
         params: `/${todo.id}`,
       });
     }
@@ -36,7 +36,7 @@ export const App = () => {
   };
 
   const todos =
-    data?.data?.filter((todo) => {
+    data?.filter((todo) => {
       if (filter === 'active') {
         return !todo.completed;
       }
@@ -67,11 +67,10 @@ export const App = () => {
         {
           <footer className="footer">
             <span className="todo-count">
-              <strong>{data?.data?.filter((todo) => !todo.completed).length ?? 0}</strong> items
-              left
+              <strong>{data?.filter((todo) => !todo.completed).length ?? 0}</strong> items left
             </span>
             <Filters value={filter} onChange={(v) => setUrlParams({ filter: v })} />
-            {data?.data?.some((todo) => todo.completed) && (
+            {data?.some((todo) => todo.completed) && (
               <button className="clear-completed">Clear completed</button>
             )}
           </footer>

@@ -7,37 +7,25 @@ export interface Todo {
 export interface TodosRequest {
   completed?: boolean;
 }
-export interface TodosResponse {
-  data?: Todo[];
-}
+export type TodosResponse = Todo[] | undefined;
 export type GetTodos = (args: TodosRequest) => TodosResponse;
 
 export interface AddTodoRequest {
-  todo: {
-    title: string;
-  };
+  title: string;
 }
-export interface AddTodoResponse {
-  data?: Todo;
-}
+export type AddTodoResponse = Todo | undefined;
 export type AddTodo = (args: AddTodoRequest) => AddTodoResponse;
 
 export interface DeleteTodoRequest {
   id: string;
 }
-export interface DeleteTodoResponse {
-  data?: Todo;
-}
+export type DeleteTodoResponse = Todo | undefined;
 export type DeleteTodo = (args: DeleteTodoRequest) => DeleteTodoResponse;
 
 export interface UpdateTodoRequest {
-  todo: {
-    id: string;
-    title?: string;
-    completed?: boolean;
-  };
+  id: string;
+  title?: string;
+  completed?: boolean;
 }
-export interface UpdateTodoResponse {
-  data?: Todo;
-}
+export type UpdateTodoResponse = Todo | undefined;
 export type UpdateTodo = (args: UpdateTodoRequest) => UpdateTodoResponse;

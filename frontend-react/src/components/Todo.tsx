@@ -28,18 +28,16 @@ export const Todo = ({ todo, onChange }: TodoProps) => {
     setIsEditing(false);
   });
 
-  const handleUpdateTodo = async (todoDto: Partial<UpdateTodoRequest['todo']>) => {
+  const handleUpdateTodo = async (todoDto: Partial<UpdateTodoRequest>) => {
     const { data } = await update({
       method: 'put',
       body: {
-        todo: {
-          id: todo.id,
-          completed: todoDto.completed,
-          title: todoDto.title,
-        },
+        id: todo.id,
+        completed: todoDto.completed,
+        title: todoDto.title,
       },
     });
-    if (data?.data != null) {
+    if (data != null) {
       onChange();
     }
   };
@@ -49,7 +47,7 @@ export const Todo = ({ todo, onChange }: TodoProps) => {
       method: 'delete',
     });
 
-    if (data?.data?.id === todo.id) {
+    if (data?.id === todo.id) {
       onChange();
     }
   };

@@ -20,13 +20,11 @@ export const NewTodo = ({ onCreate }: NewTodoProps) => {
       const { data } = await create({
         method: 'post',
         body: {
-          todo: {
-            title,
-          },
+          title,
         },
       });
 
-      if (data?.data != null) {
+      if (data != null) {
         onCreate();
         setTitle('');
       }

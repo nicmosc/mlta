@@ -22,7 +22,7 @@ const getTodos = async (req: BunRequest, res: BunResponse) => {
     const todos = await TodoModel.find({
       ...(getTodoDto.completed ? { completed: getTodoDto.completed } : {}),
     }).exec();
-    const response = { data: todos.map(mapModelToResponse) } satisfies ReturnType<GetTodos>;
+    const response = todos.map(mapModelToResponse) satisfies ReturnType<GetTodos>;
     await disconnectFromDatabase();
     return res.status(200).json(response);
   } catch (e) {
@@ -38,12 +38,12 @@ const createTodo = async (req: BunRequest, res: BunResponse) => {
   const createTodoDto = req.body as Parameters<AddTodo>[0];
   try {
     await connectToDatabase();
-    const title = createTodoDto.todo.title;
+    const title = createTodoDto.title;
     const todo = await TodoModel.create({
       title,
       completed: false,
     });
-    const response = { data: mapModelToResponse(todo) } satisfies ReturnType<AddTodo>;
+    const response = mapModelToResponse(todo) satisfies ReturnType<AddTodo>;
     await disconnectFromDatabase();
     return res.status(200).json(response);
   } catch (e: unknown) {
@@ -65,7 +65,7 @@ const deleteTodo = async (req: BunRequest, res: BunResponse) => {
     if (!todo) {
       return res.status(404).json({ message: `Could not find Todo with id: ${deleteTodoId}` });
     } else {
-      const response = { data: mapModelToResponse(todo) } satisfies ReturnType<DeleteTodo>;
+      const response = mapModelToResponse(todo) satisfies ReturnType<DeleteTodo>;
       return res.status(200).json(response);
     }
   } catch (e: unknown) {
@@ -82,13 +82,13 @@ const updateTodo = async (req: BunRequest, res: BunResponse) => {
   const updateTodoDto = req.body as Parameters<UpdateTodo>[0];
   await connectToDatabase();
   try {
-    const todo = await TodoModel.findByIdAndUpdate(updateTodoId, updateTodoDto.todo, {
+    const todo = await TodoModel.findByIdAndUpdate(updateTodoId, updateTodoDto, {
       returnDocument: 'after',
     });
     if (!todo) {
       return res.status(404).json({ message: `Could not find Todo with id: ${updateTodoId}` });
     } else {
-      const response = { data: mapModelToResponse(todo) } satisfies ReturnType<UpdateTodo>;
+      const response = mapModelToResponse(todo) satisfies ReturnType<UpdateTodo>;
       return res.status(200).json(response);
     }
   } catch (e: unknown) {

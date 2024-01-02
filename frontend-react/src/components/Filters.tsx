@@ -4,7 +4,6 @@ interface FiltersProps {
 }
 
 export const Filters = ({ value, onChange }: FiltersProps) => {
-  console.log(value);
   return (
     <ul className="filters">
       <li>

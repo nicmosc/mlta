@@ -30,35 +30,35 @@ describe('Todos', () => {
   describe('/GET todos', () => {
     it('should return a list of todos', async () => {
       const res = await request.get('/api/todos').expect(200);
-      expect(res.body).toMatchObject<TodosResponse>({
-        data: expect.arrayContaining<Todo>([
+      expect(res.body).toMatchObject<NonNullable<TodosResponse>>(
+        expect.arrayContaining<Todo>([
           {
             id: expect.any(String),
             title: expect.any(String),
             completed: expect.any(Boolean),
           },
         ]),
-      });
+      );
     });
 
     it('should return a list of filtered todos (completed or not)', async () => {
       const resCompleted = await request.get('/api/todos').query({ completed: true }).expect(200);
-      expect(resCompleted.body).toMatchObject<TodosResponse>({
-        data: expect.arrayContaining<Todo>([
+      expect(resCompleted.body).toMatchObject<NonNullable<TodosResponse>>(
+        expect.arrayContaining<Todo>([
           {
             id: expect.any(String),
             title: expect.any(String),
             completed: expect.any(Boolean),
           },
         ]),
-      });
-      expect(resCompleted.body.data).toHaveLength(1);
+      );
+      expect(resCompleted.body).toHaveLength(1);
 
       const resNotCompleted = await request
         .get('/api/todos')
         .query({ completed: false })
         .expect(200);
-      expect(resNotCompleted.body.data).toHaveLength(2);
+      expect(resNotCompleted.body).toHaveLength(2);
     });
   });
 
@@ -67,18 +67,14 @@ describe('Todos', () => {
       const res = await request
         .post('/api/todos')
         .send({
-          todo: {
-            title: 'my new todo',
-          },
+          title: 'my new todo',
         } satisfies AddTodoRequest)
         .expect(200);
 
-      expect(res.body).toMatchObject<AddTodoResponse>({
-        data: expect.objectContaining<Todo>({
-          id: expect.any(String),
-          title: 'my new todo',
-          completed: false,
-        }),
+      expect(res.body).toMatchObject<NonNullable<AddTodoResponse>>({
+        id: expect.any(String),
+        title: 'my new todo',
+        completed: false,
       });
     });
   });
@@ -88,30 +84,24 @@ describe('Todos', () => {
       const newTodo = await request
         .post('/api/todos')
         .send({
-          todo: {
-            title: 'my new todo',
-          },
+          title: 'my new todo',
         } satisfies AddTodoRequest)
         .expect(200);
-      const id = (newTodo.body as AddTodoResponse).data!.id;
+      const id = (newTodo.body as NonNullable<AddTodoResponse>).id;
 
       const res = await request
         .put(`/api/todos/${id}`)
         .send({
-          todo: {
-            id,
-            title: 'my other todo',
-            completed: true,
-          },
-        } satisfies UpdateTodoRequest)
-        .expect(200);
-
-      expect(res.body).toMatchObject<UpdateTodoResponse>({
-        data: expect.objectContaining<Todo>({
           id,
           title: 'my other todo',
           completed: true,
-        }),
+        } satisfies UpdateTodoRequest)
+        .expect(200);
+
+      expect(res.body).toMatchObject<NonNullable<UpdateTodoResponse>>({
+        id,
+        title: 'my other todo',
+        completed: true,
       });
     });
   });
@@ -119,18 +109,16 @@ describe('Todos', () => {
   describe('/DELETE todos', () => {
     it('should return the deleted todo', async () => {
       const todos = await request.get('/api/todos').expect(200);
-      expect(todos.body.data).toHaveLength(3);
+      expect(todos.body).toHaveLength(3);
 
-      const todoToDelete = todos.body.data[0] as Todo;
+      const todoToDelete = todos.body[0] as Todo;
       const res = await request.del(`/api/todos/${todoToDelete.id}`).expect(200);
 
-      expect(res.body).toMatchObject<UpdateTodoResponse>({
-        data: expect.objectContaining<Todo>(todoToDelete),
-      });
+      expect(res.body).toMatchObject<NonNullable<UpdateTodoResponse>>(todoToDelete);
 
       // Get todos again and verify it was deleted
       const todosRes = await request.get('/api/todos').expect(200);
-      expect(todosRes.body.data).toHaveLength(2);
+      expect(todosRes.body).toHaveLength(2);
     });
   });
 });
